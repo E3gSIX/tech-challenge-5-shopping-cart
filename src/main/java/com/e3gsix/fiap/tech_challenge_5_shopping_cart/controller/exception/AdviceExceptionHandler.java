@@ -44,7 +44,10 @@ public class AdviceExceptionHandler {
     }
 
     @ExceptionHandler({StandardErrorException.class})
-    public ResponseEntity<StandardError> handleStandardErrorException(StandardErrorException e, HttpServletRequest request) {
+    public ResponseEntity<StandardError> handleStandardErrorException(
+            StandardErrorException e,
+            HttpServletRequest request
+    ) {
         StandardError err = e.getStandardError();
         return ResponseEntity.status(err.status()).body(err);
     }
