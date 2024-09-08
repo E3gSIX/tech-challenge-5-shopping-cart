@@ -2,8 +2,6 @@ package com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity;
 
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.enums.ShoppingCartStatus;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 
 import java.util.*;
 
@@ -15,8 +13,7 @@ public class ShoppingCart {
 
     private UUID userId;
 
-    @OneToMany
-    @Cascade(CascadeType.ALL)
+    @OneToMany(mappedBy = "shoppingCart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShoppingCartItem> shoppingCartItems;
 
     @Enumerated(EnumType.STRING)
