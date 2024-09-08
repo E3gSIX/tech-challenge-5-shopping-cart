@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public interface ShoppingCartController {
     ResponseEntity add(
+            String authorization,
             UUID userId,
             ShoppingCartItemAddRequest request,
             UriComponentsBuilder uriComponentsBuilder
