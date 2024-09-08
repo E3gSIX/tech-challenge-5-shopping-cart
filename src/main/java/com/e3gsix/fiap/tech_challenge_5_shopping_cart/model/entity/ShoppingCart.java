@@ -52,7 +52,17 @@ public class ShoppingCart {
     }
 
     public void addItem(ShoppingCartItem shoppingCartItem) {
-        this.shoppingCartItems.add(shoppingCartItem);
+        Optional<ShoppingCartItem> alreadyInCartItem = this.shoppingCartItems.stream()
+                .filter(it -> it.getItemId() == shoppingCartItem.getItemId())
+                .findFirst();
+
+        if (alreadyInCartItem.isEmpty()) {
+            this.shoppingCartItems.add(shoppingCartItem);
+            return;
+        }
+
+        ShoppingCartItem itemToUpdate = alreadyInCartItem.get();
+        itemToUpdate.setQuantity(itemToUpdate.getQuantity() + shoppingCartItem.getQuantity());
     }
 
     public ShoppingCartStatus getStatus() {
