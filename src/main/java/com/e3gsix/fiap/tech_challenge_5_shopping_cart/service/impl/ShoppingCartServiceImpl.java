@@ -2,6 +2,7 @@ package com.e3gsix.fiap.tech_challenge_5_shopping_cart.service.impl;
 
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.clients.CredentialsClient;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.clients.ItemsClient;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.NotAuthorizedException;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.NotFoundException;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.request.ShoppingCartItemAddRequest;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ItemResponse;
@@ -11,6 +12,7 @@ import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity.ShoppingCartI
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.enums.ShoppingCartStatus;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.repository.ShoppingCartRepository;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.service.ShoppingCartService;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.service.TokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -24,25 +26,33 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
     private final ShoppingCartRepository shoppingCartRepository;
     private final CredentialsClient credentialsClient;
     private final ItemsClient itemsClient;
+    private final TokenService tokenService;
 
     public ShoppingCartServiceImpl(
             ShoppingCartRepository shoppingCartRepository,
             CredentialsClient credentialsClient,
-            ItemsClient itemsClient
-    ) {
+            ItemsClient itemsClient,
+            TokenService tokenService) {
         this.shoppingCartRepository = shoppingCartRepository;
         this.credentialsClient = credentialsClient;
         this.itemsClient = itemsClient;
+        this.tokenService = tokenService;
     }
 
     @Override
-    public Long add(UUID userId, ShoppingCartItemAddRequest request) {
+    public Long add(String authorization, UUID userId, ShoppingCartItemAddRequest request) {
         ShoppingCartItem shoppingCartItem = new ShoppingCartItem(request.itemId(), request.quantity());
 
         UserResponse userFound = getValidatedUser(userId);
 
-        ItemResponse itemFound = getValidatedItem(request.itemId());
+        String usernameToken = getUsernameFromAuthorization(authorization);
 
+        boolean isInsecureDirectObjectReferenceVulnerability = !usernameToken.equals(userFound.username());
+        if (isInsecureDirectObjectReferenceVulnerability) {
+            throw new NotAuthorizedException("Este usuário não têm permissão para realizar essa ação.");
+        }
+
+        ItemResponse itemFound = getValidatedItem(request.itemId());
         if (request.quantity() > itemFound.quantity()) {
             throw new UnsupportedOperationException("Item '" + itemFound.name() + "' está com estoque insuficiente.");
         }
@@ -66,6 +76,11 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
         }
 
         return userResponse.getBody();
+    }
+
+    private String getUsernameFromAuthorization(String authorization) {
+        String token = this.tokenService.recoverToken(authorization);
+        return this.tokenService.validateToken(token).getSubject();
     }
 
     private ItemResponse getValidatedItem(Long itemId) {

@@ -2,9 +2,7 @@ package com.e3gsix.fiap.tech_challenge_5_shopping_cart.clients.config;
 
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.StandardError;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.StandardErrorException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.utils.JsonUtil;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 
@@ -23,7 +21,7 @@ public class FeignDecoder implements ErrorDecoder {
     public Exception decode(String methodKey, Response response) {
         try {
             String body = convertInputStreamToString(response.body().asInputStream());
-            StandardError standardError = createObjectMapper().readValue(body, StandardError.class);
+            StandardError standardError = JsonUtil.createObjectMapper().readValue(body, StandardError.class);
 
             throw new StandardErrorException(standardError);
         } catch (IOException e) {
@@ -37,15 +35,5 @@ public class FeignDecoder implements ErrorDecoder {
         } catch (IOException e) {
             throw new RuntimeException("Erro ao ler o corpo da resposta", e);
         }
-    }
-
-    private ObjectMapper createObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JavaTimeModule javaTimeModule = new JavaTimeModule();
-
-        objectMapper.registerModule(javaTimeModule);
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-        return objectMapper;
     }
 }

@@ -29,11 +29,12 @@ public class ShoppingCartControllerImpl implements ShoppingCartController {
     @Override
     @PostMapping(URL_SHOPPING_CART_BY_USERID)
     public ResponseEntity add(
+            @RequestHeader("Authorization") String authorization,
             @PathVariable UUID userId,
             @RequestBody ShoppingCartItemAddRequest request,
             UriComponentsBuilder uriComponentsBuilder
     ) {
-        Long activeShoppingCartId = this.shoppingCartService.add(userId, request);
+        Long activeShoppingCartId = this.shoppingCartService.add(authorization, userId, request);
 
         URI uri = uriComponentsBuilder.path(URL_SHOPPING_CART.concat(URL_SHOPPING_CART_BY_ID))
                 .buildAndExpand(activeShoppingCartId)

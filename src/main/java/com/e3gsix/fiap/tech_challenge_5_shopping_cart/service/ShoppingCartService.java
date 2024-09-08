@@ -5,5 +5,5 @@ import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.request.Shopping
 import java.util.UUID;
 
 public interface ShoppingCartService {
-    Long add(UUID userId, ShoppingCartItemAddRequest request);
+    Long add(String authorization, UUID userId, ShoppingCartItemAddRequest request);
 }
