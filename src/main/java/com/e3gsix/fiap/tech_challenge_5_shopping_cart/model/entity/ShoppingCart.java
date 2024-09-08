@@ -65,6 +65,10 @@ public class ShoppingCart {
         itemToUpdate.setQuantity(itemToUpdate.getQuantity() + shoppingCartItem.getQuantity());
     }
 
+    public void removeItem(Long itemId) {
+        this.shoppingCartItems.removeIf(it -> it.getItemId() == itemId);
+    }
+
     public ShoppingCartStatus getStatus() {
         return status;
     }

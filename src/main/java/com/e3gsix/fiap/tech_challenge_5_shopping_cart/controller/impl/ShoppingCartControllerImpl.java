@@ -41,4 +41,21 @@ public class ShoppingCartControllerImpl implements ShoppingCartController {
 
         return ResponseEntity.created(uri).build();
     }
+
+    @Override
+    @DeleteMapping
+    public ResponseEntity remove(
+            @RequestHeader("Authorization") String authorization,
+            @RequestParam UUID userId,
+            @RequestParam Long itemId,
+            UriComponentsBuilder uriComponentsBuilder
+    ) {
+        Long activeShoppingCartId = this.shoppingCartService.remove(authorization, userId, itemId);
+
+        URI uri = uriComponentsBuilder.path(URL_SHOPPING_CART.concat(URL_SHOPPING_CART_BY_ID))
+                .buildAndExpand(activeShoppingCartId)
+                .toUri();
+
+        return ResponseEntity.created(uri).build();
+    }
 }

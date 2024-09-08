@@ -6,4 +6,6 @@ import java.util.UUID;
 
 public interface ShoppingCartService {
     Long add(String authorization, UUID userId, ShoppingCartItemAddRequest request);
+
+    Long remove(String authorization, UUID userId, Long itemId);
 }

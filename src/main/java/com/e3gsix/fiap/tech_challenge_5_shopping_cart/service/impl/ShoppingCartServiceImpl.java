@@ -61,6 +61,21 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
         return savedShoppingCart.getId();
     }
 
+    @Override
+    public Long remove(String authorization, UUID userId, Long itemId) {
+        UserResponse userFound = getValidatedUser(userId);
+
+        validatePermission(authorization, userFound);
+
+        ShoppingCart activeShoppingCart = this.getActiveShoppingCart(userFound.id());
+
+        activeShoppingCart.removeItem(itemId);
+
+        ShoppingCart savedShoppingCart = this.shoppingCartRepository.save(activeShoppingCart);
+
+        return savedShoppingCart.getId();
+    }
+
     private UserResponse getValidatedUser(UUID userId) {
         ResponseEntity<UserResponse> userResponse = this.credentialsClient.findById(userId);
         if (Objects.isNull(userResponse) ||
