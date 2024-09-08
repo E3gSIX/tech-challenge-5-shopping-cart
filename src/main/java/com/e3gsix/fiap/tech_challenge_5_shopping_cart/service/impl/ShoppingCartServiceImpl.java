@@ -45,12 +45,7 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
 
         UserResponse userFound = getValidatedUser(userId);
 
-        String usernameToken = getUsernameFromAuthorization(authorization);
-
-        boolean isInsecureDirectObjectReferenceVulnerability = !usernameToken.equals(userFound.username());
-        if (isInsecureDirectObjectReferenceVulnerability) {
-            throw new NotAuthorizedException("Este usuário não têm permissão para realizar essa ação.");
-        }
+        validatePermission(authorization, userFound);
 
         ItemResponse itemFound = getValidatedItem(request.itemId());
         if (request.quantity() > itemFound.quantity()) {
@@ -76,6 +71,15 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
         }
 
         return userResponse.getBody();
+    }
+
+    private void validatePermission(String authorization, UserResponse userFound) {
+        String usernameToken = getUsernameFromAuthorization(authorization);
+
+        boolean isInsecureDirectObjectReferenceVulnerability = !usernameToken.equals(userFound.username());
+        if (isInsecureDirectObjectReferenceVulnerability) {
+            throw new NotAuthorizedException("Este usuário não têm permissão para realizar essa ação.");
+        }
     }
 
     private String getUsernameFromAuthorization(String authorization) {
