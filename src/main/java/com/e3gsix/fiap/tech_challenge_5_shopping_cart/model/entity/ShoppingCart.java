@@ -66,6 +66,12 @@ public class ShoppingCart {
         this.shoppingCartItems.removeIf(it -> it.getItemId() == itemId);
     }
 
+    public Integer getTotalQuantity() {
+        return this.shoppingCartItems.stream()
+                .mapToInt(ShoppingCartItem::getQuantity)
+                .sum();
+    }
+
     public ShoppingCartStatus getStatus() {
         return status;
     }
