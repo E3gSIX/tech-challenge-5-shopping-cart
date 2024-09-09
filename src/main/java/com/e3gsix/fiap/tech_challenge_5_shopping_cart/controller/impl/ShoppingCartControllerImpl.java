@@ -2,6 +2,7 @@ package com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.impl;
 
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.ShoppingCartController;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.request.ShoppingCartItemAddRequest;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ShoppingCartResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.service.ShoppingCartService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -63,5 +64,17 @@ public class ShoppingCartControllerImpl implements ShoppingCartController {
         headers.setLocation(uri);
 
         return new ResponseEntity(headers, HttpStatus.NO_CONTENT);
+    }
+
+    @Override
+    @GetMapping(URL_SHOPPING_CART_BY_ID)
+    public ResponseEntity<ShoppingCartResponse> findById(
+            @RequestHeader("Authorization") String authorization,
+            @PathVariable Long id,
+            @RequestParam UUID userId
+    ) {
+        ShoppingCartResponse response = this.shoppingCartService.findById(authorization, userId, id);
+
+        return ResponseEntity.ok(response);
     }
 }
