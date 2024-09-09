@@ -77,4 +77,15 @@ public class ShoppingCartControllerImpl implements ShoppingCartController {
 
         return ResponseEntity.ok(response);
     }
+
+    @Override
+    public ResponseEntity conclude(
+            @RequestHeader("Authorization") String authorization,
+            @PathVariable Long id,
+            @RequestParam UUID userId
+    ) {
+        this.shoppingCartService.conclude(authorization, userId, id);
+
+        return ResponseEntity.ok().build();
+    }
 }
