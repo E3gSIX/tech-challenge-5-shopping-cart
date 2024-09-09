@@ -19,6 +19,7 @@ import static com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.impl.Sho
 public class ShoppingCartControllerImpl implements ShoppingCartController {
 
     public static final String URL_SHOPPING_CART = "/shopping-cart";
+    public static final String URL_SHOPPING_CART_ITEM = "/items";
     public static final String URL_SHOPPING_CART_BY_ID = "/{id}";
 
     private final ShoppingCartService shoppingCartService;
@@ -28,7 +29,7 @@ public class ShoppingCartControllerImpl implements ShoppingCartController {
     }
 
     @Override
-    @PostMapping
+    @PostMapping(URL_SHOPPING_CART_ITEM)
     public ResponseEntity add(
             @RequestHeader("Authorization") String authorization,
             @RequestParam UUID userId,
@@ -45,7 +46,7 @@ public class ShoppingCartControllerImpl implements ShoppingCartController {
     }
 
     @Override
-    @DeleteMapping
+    @DeleteMapping(URL_SHOPPING_CART_ITEM)
     public ResponseEntity remove(
             @RequestHeader("Authorization") String authorization,
             @RequestParam UUID userId,
