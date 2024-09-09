@@ -1,6 +1,7 @@
 package com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller;
 
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.request.ShoppingCartItemAddRequest;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.PaymentIntegrityResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ShoppingCartResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -23,6 +24,12 @@ public interface ShoppingCartController {
     );
 
     ResponseEntity<ShoppingCartResponse> findById(
+            String authorization,
+            Long id,
+            UUID userId
+    );
+
+    ResponseEntity<PaymentIntegrityResponse> checkIntegrityForPayment(
             String authorization,
             Long id,
             UUID userId
