@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -99,6 +100,37 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
                 getTotal(items),
                 activeShoppingCart.getStatus()
         );
+    }
+
+    @Override
+    public void conclude(String authorization, UUID userId, Long id) {
+        UserResponse userFound = getValidatedUser(userId);
+
+        validatePermission(authorization, userFound);
+
+        ShoppingCart activeShoppingCart = getValidatedActiveShoppingCart(id);
+
+        activeShoppingCart.setStatus(ShoppingCartStatus.CONCLUDED);
+
+        this.shoppingCartRepository.save(activeShoppingCart);
+    }
+
+    private ShoppingCart getValidatedActiveShoppingCart(Long id) {
+        Optional<ShoppingCart> optionalActiveShoppingCart = this.shoppingCartRepository.findById(id);
+        if (optionalActiveShoppingCart.isEmpty()) {
+            throw new NotFoundException("O carrinho não foi encontrado.");
+        }
+
+        ShoppingCart activeShoppingCart = optionalActiveShoppingCart.get();
+        if (activeShoppingCart.getStatus() != ShoppingCartStatus.ACTIVE) {
+            throw new UnsupportedOperationException("O carrinho já se encontra em estado final.");
+        }
+
+        if (activeShoppingCart.getTotalQuantity() <= 0) {
+            throw new UnsupportedOperationException("O carrinho precisa ter ao menos um item para ser concluído.");
+        }
+
+        return activeShoppingCart;
     }
 
     private BigDecimal getTotal(List<ShoppingCartItemResponse> items) {
