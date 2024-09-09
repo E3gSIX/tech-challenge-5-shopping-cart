@@ -2,6 +2,7 @@ package com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.impl;
 
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.ShoppingCartController;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.request.ShoppingCartItemAddRequest;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.PaymentIntegrityResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ShoppingCartResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.service.ShoppingCartService;
 import org.springframework.http.HttpHeaders;
@@ -22,6 +23,7 @@ public class ShoppingCartControllerImpl implements ShoppingCartController {
     public static final String URL_SHOPPING_CART = "/shopping-cart";
     public static final String URL_SHOPPING_CART_ITEM = "/items";
     public static final String URL_SHOPPING_CART_BY_ID = "/{id}";
+    public static final String URL_SHOPPING_CART_BY_ID_PAYMENT_INTEGRITY = "/{id}/payment-integrity";
 
     private final ShoppingCartService shoppingCartService;
 
@@ -74,6 +76,18 @@ public class ShoppingCartControllerImpl implements ShoppingCartController {
             @RequestParam UUID userId
     ) {
         ShoppingCartResponse response = this.shoppingCartService.findById(authorization, userId, id);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @GetMapping(URL_SHOPPING_CART_BY_ID_PAYMENT_INTEGRITY)
+    public ResponseEntity<PaymentIntegrityResponse> checkIntegrityForPayment(
+            @RequestHeader("Authorization") String authorization,
+            @PathVariable Long id,
+            @RequestParam UUID userId
+    ) {
+        PaymentIntegrityResponse response = this.shoppingCartService.checkPaymentIntegrity(authorization, userId, id);
 
         return ResponseEntity.ok(response);
     }

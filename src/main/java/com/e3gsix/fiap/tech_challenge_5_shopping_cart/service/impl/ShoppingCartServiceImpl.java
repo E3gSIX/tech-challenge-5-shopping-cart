@@ -5,10 +5,7 @@ import com.e3gsix.fiap.tech_challenge_5_shopping_cart.clients.ItemsClient;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.NotAuthorizedException;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.NotFoundException;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.request.ShoppingCartItemAddRequest;
-import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ItemResponse;
-import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ShoppingCartItemResponse;
-import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ShoppingCartResponse;
-import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.UserResponse;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.*;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity.ShoppingCart;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity.ShoppingCartItem;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.enums.ShoppingCartStatus;
@@ -100,6 +97,21 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
                 getTotal(items),
                 activeShoppingCart.getStatus()
         );
+    }
+
+    @Override
+    public PaymentIntegrityResponse checkPaymentIntegrity(String authorization, UUID userId, Long id) {
+        try {
+            UserResponse userFound = getValidatedUser(userId);
+
+            validatePermission(authorization, userFound);
+
+            getValidatedActiveShoppingCart(id);
+
+            return new PaymentIntegrityResponse(true, "OK");
+        } catch (Exception ex) {
+            return new PaymentIntegrityResponse(false, ex.getMessage());
+        }
     }
 
     @Override
