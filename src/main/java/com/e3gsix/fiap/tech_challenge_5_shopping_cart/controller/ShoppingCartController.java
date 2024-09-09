@@ -13,4 +13,11 @@ public interface ShoppingCartController {
             ShoppingCartItemAddRequest request,
             UriComponentsBuilder uriComponentsBuilder
     );
+
+    ResponseEntity remove(
+            String authorization,
+            UUID userId,
+            Long itemId,
+            UriComponentsBuilder uriComponentsBuilder
+    );
 }

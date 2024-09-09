@@ -3,6 +3,8 @@ package com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.impl;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.ShoppingCartController;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.request.ShoppingCartItemAddRequest;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.service.ShoppingCartService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -40,5 +42,25 @@ public class ShoppingCartControllerImpl implements ShoppingCartController {
                 .toUri();
 
         return ResponseEntity.created(uri).build();
+    }
+
+    @Override
+    @DeleteMapping
+    public ResponseEntity remove(
+            @RequestHeader("Authorization") String authorization,
+            @RequestParam UUID userId,
+            @RequestParam Long itemId,
+            UriComponentsBuilder uriComponentsBuilder
+    ) {
+        Long activeShoppingCartId = this.shoppingCartService.remove(authorization, userId, itemId);
+
+        URI uri = uriComponentsBuilder.path(URL_SHOPPING_CART.concat(URL_SHOPPING_CART_BY_ID))
+                .buildAndExpand(activeShoppingCartId)
+                .toUri();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(uri);
+
+        return new ResponseEntity(headers, HttpStatus.NO_CONTENT);
     }
 }

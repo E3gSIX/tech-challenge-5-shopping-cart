@@ -45,12 +45,7 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
 
         UserResponse userFound = getValidatedUser(userId);
 
-        String usernameToken = getUsernameFromAuthorization(authorization);
-
-        boolean isInsecureDirectObjectReferenceVulnerability = !usernameToken.equals(userFound.username());
-        if (isInsecureDirectObjectReferenceVulnerability) {
-            throw new NotAuthorizedException("Este usuário não têm permissão para realizar essa ação.");
-        }
+        validatePermission(authorization, userFound);
 
         ItemResponse itemFound = getValidatedItem(request.itemId());
         if (request.quantity() > itemFound.quantity()) {
@@ -60,6 +55,21 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
         ShoppingCart activeShoppingCart = this.getActiveShoppingCart(userFound.id());
         shoppingCartItem.setShoppingCart(activeShoppingCart);
         activeShoppingCart.addItem(shoppingCartItem);
+
+        ShoppingCart savedShoppingCart = this.shoppingCartRepository.save(activeShoppingCart);
+
+        return savedShoppingCart.getId();
+    }
+
+    @Override
+    public Long remove(String authorization, UUID userId, Long itemId) {
+        UserResponse userFound = getValidatedUser(userId);
+
+        validatePermission(authorization, userFound);
+
+        ShoppingCart activeShoppingCart = this.getActiveShoppingCart(userFound.id());
+
+        activeShoppingCart.removeItem(itemId);
 
         ShoppingCart savedShoppingCart = this.shoppingCartRepository.save(activeShoppingCart);
 
@@ -76,6 +86,15 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
         }
 
         return userResponse.getBody();
+    }
+
+    private void validatePermission(String authorization, UserResponse userFound) {
+        String usernameToken = getUsernameFromAuthorization(authorization);
+
+        boolean isInsecureDirectObjectReferenceVulnerability = !usernameToken.equals(userFound.username());
+        if (isInsecureDirectObjectReferenceVulnerability) {
+            throw new NotAuthorizedException("Este usuário não têm permissão para realizar essa ação.");
+        }
     }
 
     private String getUsernameFromAuthorization(String authorization) {
