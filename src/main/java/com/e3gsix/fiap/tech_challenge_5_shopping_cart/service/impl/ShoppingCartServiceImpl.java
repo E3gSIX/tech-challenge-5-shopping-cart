@@ -6,6 +6,8 @@ import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.NotAu
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.NotFoundException;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.request.ShoppingCartItemAddRequest;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ItemResponse;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ShoppingCartItemResponse;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ShoppingCartResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.UserResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity.ShoppingCart;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity.ShoppingCartItem;
@@ -17,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -74,6 +78,43 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
         ShoppingCart savedShoppingCart = this.shoppingCartRepository.save(activeShoppingCart);
 
         return savedShoppingCart.getId();
+    }
+
+    @Override
+    public ShoppingCartResponse findById(String authorization, UUID userId, Long id) {
+        UserResponse userFound = getValidatedUser(userId);
+
+        validatePermission(authorization, userFound);
+
+        ShoppingCart activeShoppingCart = this.getActiveShoppingCart(userFound.id());
+
+        List<ShoppingCartItemResponse> items = activeShoppingCart.getShoppingCartItems().stream()
+                .map(it -> toShoppingCartItemResponse(it))
+                .toList();
+
+        return new ShoppingCartResponse(
+                activeShoppingCart.getId(),
+                activeShoppingCart.getUserId(),
+                items,
+                getTotal(items),
+                activeShoppingCart.getStatus()
+        );
+    }
+
+    private BigDecimal getTotal(List<ShoppingCartItemResponse> items) {
+        return items.stream()
+                .map(it -> it.price().multiply(BigDecimal.valueOf(it.quantity())))
+                .reduce(BigDecimal::add)
+                .orElse(BigDecimal.ZERO);
+    }
+
+    private ShoppingCartItemResponse toShoppingCartItemResponse(ShoppingCartItem inCartItem) {
+        ItemResponse itemResponse = getValidatedItem(inCartItem.getId());
+        return new ShoppingCartItemResponse(
+                itemResponse.name(),
+                itemResponse.price(),
+                inCartItem.getQuantity()
+        );
     }
 
     private UserResponse getValidatedUser(UUID userId) {
