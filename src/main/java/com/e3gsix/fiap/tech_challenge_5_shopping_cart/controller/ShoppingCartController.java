@@ -27,4 +27,10 @@ public interface ShoppingCartController {
             Long id,
             UUID userId
     );
+
+    ResponseEntity conclude(
+            String authorization,
+            Long id,
+            UUID userId
+    );
 }
