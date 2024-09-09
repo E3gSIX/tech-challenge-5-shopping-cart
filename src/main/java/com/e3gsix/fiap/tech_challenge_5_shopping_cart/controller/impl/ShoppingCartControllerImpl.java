@@ -20,7 +20,7 @@ import static com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.impl.Sho
 @RequestMapping(URL_SHOPPING_CART)
 public class ShoppingCartControllerImpl implements ShoppingCartController {
 
-    public static final String URL_SHOPPING_CART = "/shopping-cart";
+    public static final String URL_SHOPPING_CART = "/shopping-carts";
     public static final String URL_SHOPPING_CART_ITEM = "/items";
     public static final String URL_SHOPPING_CART_BY_ID = "/{id}";
     public static final String URL_SHOPPING_CART_BY_ID_PAYMENT_INTEGRITY = "/{id}/payment-integrity";
