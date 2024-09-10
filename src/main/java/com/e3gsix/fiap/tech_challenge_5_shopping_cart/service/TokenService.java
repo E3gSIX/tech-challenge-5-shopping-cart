@@ -12,4 +12,6 @@ public interface TokenService {
     DecodedJWT validateToken(String token);
 
     Collection<? extends GrantedAuthority> getAuthoritiesFromToken(DecodedJWT jwt);
+
+    Boolean isAdmin(String authorization);
 }
