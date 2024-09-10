@@ -127,10 +127,9 @@ public class ShoppingCartControllerImpl implements ShoppingCartController {
     @GetMapping(URL_SHOPPING_CART_BY_ID)
     public ResponseEntity<ShoppingCartResponse> findById(
             @RequestHeader("Authorization") String authorization,
-            @PathVariable Long id,
-            @RequestParam UUID userId
+            @PathVariable Long id
     ) {
-        ShoppingCartResponse response = this.shoppingCartService.findById(authorization, userId, id);
+        ShoppingCartResponse response = this.shoppingCartService.findById(authorization, id);
 
         return ResponseEntity.ok(response);
     }
@@ -151,10 +150,9 @@ public class ShoppingCartControllerImpl implements ShoppingCartController {
     @GetMapping(URL_SHOPPING_CART_BY_ID_PAYMENT_INTEGRITY)
     public ResponseEntity<PaymentIntegrityResponse> checkIntegrityForPayment(
             @RequestHeader("Authorization") String authorization,
-            @PathVariable Long id,
-            @RequestParam UUID userId
+            @PathVariable Long id
     ) {
-        PaymentIntegrityResponse response = this.shoppingCartService.checkPaymentIntegrity(authorization, userId, id);
+        PaymentIntegrityResponse response = this.shoppingCartService.checkPaymentIntegrity(authorization, id);
 
         return ResponseEntity.ok(response);
     }
