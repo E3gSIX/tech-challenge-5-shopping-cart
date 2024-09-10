@@ -8,6 +8,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,12 +16,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Objects;
+
+import static com.e3gsix.fiap.tech_challenge_5_shopping_cart.swagger.SwaggerConfig.*;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
+
+    private final Map<String, HttpMethod> PERMITTED_RESOURCE = Map.of(
+            URL_SWAGGER, HttpMethod.GET,
+            URL_SWAGGER_DEFAULT, HttpMethod.GET,
+            URL_SWAGGER_API, HttpMethod.GET
+    );
 
     public SecurityFilter(TokenService tokenService) {
         this.tokenService = tokenService;
@@ -32,6 +42,11 @@ public class SecurityFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
+        if (isPermittedEndpoint(request.getRequestURI(), request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String token = this.recoverToken(request);
 
         if (Objects.isNull(token)) {
@@ -51,6 +66,17 @@ public class SecurityFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isPermittedEndpoint(String endpoint, String method) {
+        for (String resourceEndpoint : PERMITTED_RESOURCE.keySet()) {
+            if (endpoint.contains(resourceEndpoint)) {
+                HttpMethod resourceMethod = PERMITTED_RESOURCE.get(resourceEndpoint);
+                if (method.equals(resourceMethod.name())) return true;
+            }
+        }
+
+        return false;
     }
 
     private void unauthorizeResponse(
