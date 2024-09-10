@@ -1,21 +1,23 @@
 package com.e3gsix.fiap.tech_challenge_5_shopping_cart.security;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.StandardError;
-import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.utils.JsonUtil;
-import com.e3gsix.fiap.tech_challenge_5_shopping_cart.service.TokenService;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Objects;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-import java.util.Objects;
+import com.auth0.jwt.interfaces.DecodedJWT;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.StandardError;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.utils.JsonUtil;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.service.TokenService;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
@@ -53,7 +55,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void unauthorizeResponse(
+    void unauthorizeResponse(
             HttpServletRequest request,
             HttpServletResponse response,
             String message

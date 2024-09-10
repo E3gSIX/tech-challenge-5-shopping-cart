@@ -1,67 +1,72 @@
 package com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity(name = "shopping_cart_items")
 public class ShoppingCartItem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private Long itemId;
-    private Integer quantity;
+	private Long itemId;
+	private Integer quantity;
 
-    @ManyToOne
-    @JoinColumn(name = "shopping_cart_id")
-    private ShoppingCart shoppingCart;
+	@ManyToOne
+	@JoinColumn(name = "shopping_cart_id")
+	private ShoppingCart shoppingCart;
 
-    public ShoppingCartItem() {
-    }
+	public ShoppingCartItem() {
+	}
 
-    public ShoppingCartItem(Long itemId, Integer quantity) {
-        this.setItemId(itemId);
-        this.setQuantity(quantity);
-    }
+	public ShoppingCartItem(Long itemId, Integer quantity) {
+		this.setItemId(itemId);
+		this.setQuantity(quantity);
+	}
 
-    public ShoppingCartItem(Long itemId, Integer quantity, ShoppingCart shoppingCart) {
-        this.setItemId(itemId);
-        this.setQuantity(quantity);
-        this.shoppingCart = shoppingCart;
-    }
+	public ShoppingCartItem(Long itemId, Integer quantity, ShoppingCart shoppingCart) {
+		this.setItemId(itemId);
+		this.setQuantity(quantity);
+		this.shoppingCart = shoppingCart;
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public Long getItemId() {
-        return itemId;
-    }
+	public Long getItemId() {
+		return itemId;
+	}
 
-    public void setItemId(Long itemId) {
-        if (itemId < 0) {
-            throw new IllegalArgumentException("Id do item não pode estar negativo no carrinho.");
-        }
+	public void setItemId(Long itemId) {
+		if (itemId < 0) {
+			throw new IllegalArgumentException("Id do item não pode estar negativo no carrinho.");
+		}
 
-        this.itemId = itemId;
-    }
+		this.itemId = itemId;
+	}
 
-    public Integer getQuantity() {
-        return quantity;
-    }
+	public Integer getQuantity() {
+		return quantity;
+	}
 
-    public void setQuantity(Integer quantity) {
-        if (quantity < 0) {
-            throw new IllegalArgumentException("Quantidade do item não pode estar negativa no carrinho.");
-        }
+	public void setQuantity(Integer quantity) {
+		if (quantity < 0) {
+			throw new IllegalArgumentException("Quantidade do item não pode estar negativa no carrinho.");
+		}
 
-        this.quantity = quantity;
-    }
+		this.quantity = quantity;
+	}
 
-    public ShoppingCart getShoppingCart() {
-        return shoppingCart;
-    }
+	public ShoppingCart getShoppingCart() {
+		return shoppingCart;
+	}
 
-    public void setShoppingCart(ShoppingCart shoppingCart) {
-        this.shoppingCart = shoppingCart;
-    }
+	public void setShoppingCart(ShoppingCart shoppingCart) {
+		this.shoppingCart = shoppingCart;
+	}
 }

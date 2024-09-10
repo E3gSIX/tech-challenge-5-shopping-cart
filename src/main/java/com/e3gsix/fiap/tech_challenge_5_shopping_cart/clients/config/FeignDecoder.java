@@ -15,8 +15,6 @@ import java.util.stream.Collectors;
 
 public class FeignDecoder implements ErrorDecoder {
 
-    private final ErrorDecoder defaultErrorDecoder = new Default();
-
     @Override
     public Exception decode(String methodKey, Response response) {
         try {
@@ -29,7 +27,7 @@ public class FeignDecoder implements ErrorDecoder {
         }
     }
 
-    private String convertInputStreamToString(InputStream inputStream) {
+    String convertInputStreamToString(InputStream inputStream) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
             return reader.lines().collect(Collectors.joining("\n"));
         } catch (IOException e) {
