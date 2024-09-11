@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.enums.UserRole;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.service.TokenService;
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
@@ -56,5 +57,11 @@ public class TokenServiceImpl implements TokenService {
             logger.error(e.getMessage());
             return null;
         }
+    }
+
+    @Override
+    public Boolean isAdmin(String token) {
+        DecodedJWT decodedJWT = this.validateToken(token);
+        return this.getAuthoritiesFromToken(decodedJWT).contains(UserRole.ADMIN);
     }
 }

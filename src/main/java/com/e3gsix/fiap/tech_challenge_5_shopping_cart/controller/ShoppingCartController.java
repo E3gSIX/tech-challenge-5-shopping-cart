@@ -25,14 +25,12 @@ public interface ShoppingCartController {
 
     ResponseEntity<ShoppingCartResponse> findById(
             String authorization,
-            Long id,
-            UUID userId
+            Long id
     );
 
     ResponseEntity<PaymentIntegrityResponse> checkIntegrityForPayment(
             String authorization,
-            Long id,
-            UUID userId
+            Long id
     );
 
     ResponseEntity conclude(
