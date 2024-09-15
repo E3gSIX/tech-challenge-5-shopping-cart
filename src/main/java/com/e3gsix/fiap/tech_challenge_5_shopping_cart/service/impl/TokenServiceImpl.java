@@ -62,6 +62,11 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public Boolean isAdmin(String token) {
         DecodedJWT decodedJWT = this.validateToken(token);
-        return this.getAuthoritiesFromToken(decodedJWT).contains(UserRole.ADMIN);
+
+        Collection<? extends GrantedAuthority> authorities = getAuthoritiesFromToken(decodedJWT);
+
+        return authorities.stream().map(it -> it.getAuthority())
+                .toList()
+                .contains(UserRole.ADMIN.getRole());
     }
 }
