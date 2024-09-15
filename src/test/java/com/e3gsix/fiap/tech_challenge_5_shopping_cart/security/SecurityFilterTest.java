@@ -30,7 +30,7 @@ public class SecurityFilterTest {
     	    PrintWriter printWriter = new PrintWriter(stringWriter);
 
     	    when(request.getRequestURI()).thenReturn("/test");
-    	    when(response.getWriter()).thenReturn(printWriter); // Add this line
+    	    when(response.getWriter()).thenReturn(printWriter);
 
     	    securityFilter.unauthorizeResponse(request, response, "Unauthorized");
 

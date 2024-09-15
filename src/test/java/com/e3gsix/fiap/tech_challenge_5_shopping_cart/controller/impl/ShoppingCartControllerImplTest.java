@@ -27,7 +27,6 @@ public class ShoppingCartControllerImplTest {
         ShoppingCartItemAddRequest request = new ShoppingCartItemAddRequest(1L, 2);
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
 
-        // Ensure the stubbing is correctly completed
         when(shoppingCartService.add(authorization, userId, request)).thenReturn(1L);
 
         ResponseEntity<?> response = controller.add(authorization, userId, request, uriComponentsBuilder);

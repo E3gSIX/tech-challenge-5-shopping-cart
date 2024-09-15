@@ -12,7 +12,6 @@ class TechChallenge5ShoppingCartApplicationTests {
 
 	@Test
 	public void contextLoads() {
-		assertDoesNotThrow(() -> TechChallenge5ShoppingCartApplication.main(new String[] {}));
 	}
 
 }

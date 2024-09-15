@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class TokenServiceImpl implements TokenService {
 
     @Value("${api.security.token.secret}")
-    private String secret ;
+    private String secret;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
