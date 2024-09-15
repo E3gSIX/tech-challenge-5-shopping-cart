@@ -79,7 +79,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         return false;
     }
 
-    private void unauthorizeResponse(
+    void unauthorizeResponse(
             HttpServletRequest request,
             HttpServletResponse response,
             String message

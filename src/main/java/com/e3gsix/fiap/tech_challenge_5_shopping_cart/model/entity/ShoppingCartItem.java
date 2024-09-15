@@ -1,6 +1,11 @@
 package com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity(name = "shopping_cart_items")
 public class ShoppingCartItem {
