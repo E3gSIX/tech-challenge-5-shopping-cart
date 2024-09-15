@@ -50,12 +50,11 @@ public class ShoppingCartControllerImplTest {
     public void testFindById() {
         String authorization = "Bearer token";
         Long id = 1L;
-        UUID userId = UUID.randomUUID();
         ShoppingCartResponse responseMock = mock(ShoppingCartResponse.class);
 
-        when(shoppingCartService.findById(authorization, userId, id)).thenReturn(responseMock);
+        when(shoppingCartService.findById(authorization, id)).thenReturn(responseMock);
 
-        ResponseEntity<ShoppingCartResponse> response = controller.findById(authorization, id, userId);
+        ResponseEntity<ShoppingCartResponse> response = controller.findById(authorization, id);
         assertEquals(200, response.getStatusCode().value());
         assertEquals(responseMock, response.getBody());
     }
@@ -64,12 +63,11 @@ public class ShoppingCartControllerImplTest {
     public void testCheckIntegrityForPayment() {
         String authorization = "Bearer token";
         Long id = 1L;
-        UUID userId = UUID.randomUUID();
         PaymentIntegrityResponse responseMock = mock(PaymentIntegrityResponse.class);
 
-        when(shoppingCartService.checkPaymentIntegrity(authorization, userId, id)).thenReturn(responseMock);
+        when(shoppingCartService.checkPaymentIntegrity(authorization, id)).thenReturn(responseMock);
 
-        ResponseEntity<PaymentIntegrityResponse> response = controller.checkIntegrityForPayment(authorization, id, userId);
+        ResponseEntity<PaymentIntegrityResponse> response = controller.checkIntegrityForPayment(authorization, id);
         assertEquals(200, response.getStatusCode().value());
         assertEquals(responseMock, response.getBody());
     }
