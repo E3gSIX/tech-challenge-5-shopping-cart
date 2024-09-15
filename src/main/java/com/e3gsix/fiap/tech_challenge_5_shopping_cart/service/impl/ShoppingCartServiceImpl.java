@@ -55,6 +55,8 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
         }
 
         ShoppingCart activeShoppingCart = this.getActiveShoppingCart(userFound.id());
+        validateFinalStatus(activeShoppingCart);
+
         shoppingCartItem.setShoppingCart(activeShoppingCart);
         activeShoppingCart.addItem(shoppingCartItem);
 
@@ -70,6 +72,7 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
         validatePermission(authorization, userFound);
 
         ShoppingCart activeShoppingCart = this.getActiveShoppingCart(userFound.id());
+        validateFinalStatus(activeShoppingCart);
 
         activeShoppingCart.removeItem(itemId);
 
@@ -79,12 +82,9 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public ShoppingCartResponse findById(String authorization, UUID userId, Long id) {
-        UserResponse userFound = getValidatedUser(userId);
-
-        validatePermission(authorization, userFound);
-
-        ShoppingCart activeShoppingCart = this.getActiveShoppingCart(userFound.id());
+    public ShoppingCartResponse findById(String authorization, Long id) {
+        ShoppingCart activeShoppingCart = this.shoppingCartRepository.findById(id)
+                .orElseThrow(() -> createNotFoundShoppingCartException(id));
 
         List<ShoppingCartItemResponse> items = activeShoppingCart.getShoppingCartItems().stream()
                 .map(it -> toShoppingCartItemResponse(it))
@@ -100,15 +100,15 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public PaymentIntegrityResponse checkPaymentIntegrity(String authorization, UUID userId, Long id) {
+    public PaymentIntegrityResponse checkPaymentIntegrity(String authorization, Long id) {
         try {
-            UserResponse userFound = getValidatedUser(userId);
+            ShoppingCart activeShoppingCart = getValidatedActiveShoppingCart(id);
 
-            validatePermission(authorization, userFound);
+            if (activeShoppingCart.getTotalQuantity() <= 0) {
+                throw new UnsupportedOperationException("O carrinho precisa ter ao menos um item para ser concluído.");
+            }
 
-            getValidatedActiveShoppingCart(id);
-
-            return new PaymentIntegrityResponse(true, "OK");
+            return new PaymentIntegrityResponse(true, "Ready to conclude.");
         } catch (Exception ex) {
             return new PaymentIntegrityResponse(false, ex.getMessage());
         }
@@ -130,19 +130,23 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
     private ShoppingCart getValidatedActiveShoppingCart(Long id) {
         Optional<ShoppingCart> optionalActiveShoppingCart = this.shoppingCartRepository.findById(id);
         if (optionalActiveShoppingCart.isEmpty()) {
-            throw new NotFoundException("O carrinho não foi encontrado.");
+            throw createNotFoundShoppingCartException(id);
         }
 
         ShoppingCart activeShoppingCart = optionalActiveShoppingCart.get();
+        validateFinalStatus(activeShoppingCart);
+
+        return activeShoppingCart;
+    }
+
+    private static void validateFinalStatus(ShoppingCart activeShoppingCart) {
         if (activeShoppingCart.getStatus() != ShoppingCartStatus.ACTIVE) {
             throw new UnsupportedOperationException("O carrinho já se encontra em estado final.");
         }
+    }
 
-        if (activeShoppingCart.getTotalQuantity() <= 0) {
-            throw new UnsupportedOperationException("O carrinho precisa ter ao menos um item para ser concluído.");
-        }
-
-        return activeShoppingCart;
+    private static NotFoundException createNotFoundShoppingCartException(Long id) {
+        return new NotFoundException("Carrinho de compras com id '" + id + "' não foi encontrado");
     }
 
     private BigDecimal getTotal(List<ShoppingCartItemResponse> items) {
@@ -174,7 +178,11 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     private void validatePermission(String authorization, UserResponse userFound) {
-        String usernameToken = getUsernameFromAuthorization(authorization);
+        String token = this.tokenService.recoverToken(authorization);
+
+        if (this.tokenService.isAdmin(token)) return;
+
+        String usernameToken = getUsernameFromAuthorization(token);
 
         boolean isInsecureDirectObjectReferenceVulnerability = !usernameToken.equals(userFound.username());
         if (isInsecureDirectObjectReferenceVulnerability) {
@@ -182,8 +190,7 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
         }
     }
 
-    private String getUsernameFromAuthorization(String authorization) {
-        String token = this.tokenService.recoverToken(authorization);
+    private String getUsernameFromAuthorization(String token) {
         return this.tokenService.validateToken(token).getSubject();
     }
 
