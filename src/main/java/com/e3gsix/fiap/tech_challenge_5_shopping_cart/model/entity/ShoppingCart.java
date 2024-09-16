@@ -28,6 +28,13 @@ public class ShoppingCart {
         this.status = ShoppingCartStatus.ACTIVE;
     }
 
+    public ShoppingCart(Long id, UUID userId) {
+        this.id = id;
+        this.setUserId(userId);
+        this.shoppingCartItems = new ArrayList<>();
+        this.status = ShoppingCartStatus.ACTIVE;
+    }
+
     public Long getId() {
         return id;
     }
