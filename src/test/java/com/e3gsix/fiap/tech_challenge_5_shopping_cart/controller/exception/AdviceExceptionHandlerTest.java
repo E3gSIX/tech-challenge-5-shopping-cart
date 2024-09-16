@@ -25,6 +25,15 @@ public class AdviceExceptionHandlerTest {
     }
 
     @Test
+    public void testHandleUnsupportedOperationException() {
+        when(request.getRequestURI()).thenReturn("/test");
+        UnsupportedOperationException exception = new UnsupportedOperationException("Unsupported operation");
+        ResponseEntity<StandardError> response = handler.handleUnsupportedOperationException(exception, request);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Unsupported operation", response.getBody().message());
+    }
+
+    @Test
     public void testHandleNotFoundException() {
         when(request.getRequestURI()).thenReturn("/test");
         NotFoundException exception = new NotFoundException("Not found");
