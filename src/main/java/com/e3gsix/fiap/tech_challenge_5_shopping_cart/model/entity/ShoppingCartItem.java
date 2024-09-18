@@ -34,6 +34,13 @@ public class ShoppingCartItem {
         this.shoppingCart = shoppingCart;
     }
 
+    public ShoppingCartItem(long id, Long itemId, int quantity, ShoppingCart shoppingCart) {
+        this.id = id;
+        this.setItemId(itemId);
+        this.setQuantity(quantity);
+        this.shoppingCart = shoppingCart;
+    }
+
     public Long getId() {
         return id;
     }
