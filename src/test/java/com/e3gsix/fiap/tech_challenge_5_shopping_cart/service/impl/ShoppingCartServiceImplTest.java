@@ -9,6 +9,7 @@ import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.request.Shopping
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ItemResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.UserResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity.ShoppingCart;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity.ShoppingCartItem;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.enums.ShoppingCartStatus;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.enums.UserRole;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.repository.ShoppingCartRepository;
@@ -166,6 +167,42 @@ public class ShoppingCartServiceImplTest {
         );
 
         assertEquals("Este usuário não têm permissão para realizar essa ação.", notAuthorizedException.getMessage());
+    }
+
+    @Test
+    void remove_validData_shouldRemoveItemFromShoppingCartSuccessfully(){
+        UUID userId = UUID.randomUUID();
+        Long itemId = 1L;
+        Integer itemQuantity = 10;
+        String token = "token";
+        String authorization = "Bearer " + token;
+        String username = "username";
+
+        UserResponse userResponse = new UserResponse(userId, username, UserRole.ADMIN);
+        when(credentialsClient.findById(userId)).thenReturn(ResponseEntity.ok(userResponse));
+
+        when(tokenService.recoverToken(authorization)).thenReturn(token);
+        when(decodedJWT.getSubject()).thenReturn(username);
+        when(tokenService.validateToken(token)).thenReturn(decodedJWT);
+
+        ItemResponse itemResponse = new ItemResponse("name", "description", new BigDecimal("10.00"), itemQuantity * 3);
+        when(itemsClient.findById(itemId)).thenReturn(ResponseEntity.ok(itemResponse));
+
+        Long shoppingCartId = 123L;
+        ShoppingCart shoppingCart = new ShoppingCart(shoppingCartId, userId);
+        shoppingCart.addItem(new ShoppingCartItem(itemId, 10));
+
+        when(shoppingCartRepository.findTop1ByStatusAndUserId(ShoppingCartStatus.ACTIVE, userId))
+                .thenReturn(Optional.of(shoppingCart));
+
+        when(shoppingCartRepository.save(shoppingCart)).thenReturn(shoppingCart);
+
+        Long result = shoppingCartService.remove(authorization, userId, itemId);
+
+        assertNotNull(result);
+        assertEquals(shoppingCartId, result);
+        assertEquals(0, shoppingCart.getShoppingCartItems().size());
+        verify(shoppingCartRepository, times(1)).save(shoppingCart);
     }
 
 
