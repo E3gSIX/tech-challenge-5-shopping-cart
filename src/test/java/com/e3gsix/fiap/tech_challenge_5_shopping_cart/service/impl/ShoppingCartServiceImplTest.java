@@ -231,7 +231,7 @@ public class ShoppingCartServiceImplTest {
         ItemResponse itemResponse = new ItemResponse("name", "description", new BigDecimal("10.00"), itemQuantity * 3);
         when(itemsClient.findById(itemId)).thenReturn(ResponseEntity.ok(itemResponse));
 
-        ShoppingCartResponse result = shoppingCartService.findById(authorization, itemId);
+        ShoppingCartResponse result = shoppingCartService.findById(itemId);
 
         assertNotNull(result);
         assertEquals(shoppingCartId, result.id());
@@ -254,7 +254,7 @@ public class ShoppingCartServiceImplTest {
 
         NotFoundException notFoundException = assertThrows(
                 NotFoundException.class,
-                () -> shoppingCartService.findById("token", shoppingCartId)
+                () -> shoppingCartService.findById(shoppingCartId)
         );
 
         assertEquals(

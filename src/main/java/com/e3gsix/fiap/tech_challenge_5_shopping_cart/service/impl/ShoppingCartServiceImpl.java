@@ -82,7 +82,7 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     @Override
-    public ShoppingCartResponse findById(String authorization, Long id) {
+    public ShoppingCartResponse findById(Long id) {
         ShoppingCart activeShoppingCart = this.shoppingCartRepository.findById(id)
                 .orElseThrow(() -> createNotFoundShoppingCartException(id));
 

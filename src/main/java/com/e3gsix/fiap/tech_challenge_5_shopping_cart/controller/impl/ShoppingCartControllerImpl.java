@@ -125,11 +125,8 @@ public class ShoppingCartControllerImpl implements ShoppingCartController {
     )
     @Override
     @GetMapping(URL_SHOPPING_CART_BY_ID)
-    public ResponseEntity<ShoppingCartResponse> findById(
-            @RequestHeader("Authorization") String authorization,
-            @PathVariable Long id
-    ) {
-        ShoppingCartResponse response = this.shoppingCartService.findById(authorization, id);
+    public ResponseEntity<ShoppingCartResponse> findById(@PathVariable Long id) {
+        ShoppingCartResponse response = this.shoppingCartService.findById(id);
 
         return ResponseEntity.ok(response);
     }

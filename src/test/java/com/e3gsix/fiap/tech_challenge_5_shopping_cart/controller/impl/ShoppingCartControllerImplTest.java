@@ -52,9 +52,9 @@ public class ShoppingCartControllerImplTest {
         Long id = 1L;
         ShoppingCartResponse responseMock = mock(ShoppingCartResponse.class);
 
-        when(shoppingCartService.findById(authorization, id)).thenReturn(responseMock);
+        when(shoppingCartService.findById(id)).thenReturn(responseMock);
 
-        ResponseEntity<ShoppingCartResponse> response = controller.findById(authorization, id);
+        ResponseEntity<ShoppingCartResponse> response = controller.findById(id);
         assertEquals(200, response.getStatusCode().value());
         assertEquals(responseMock, response.getBody());
     }
