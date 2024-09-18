@@ -7,6 +7,7 @@ import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.NotAu
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.NotFoundException;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.request.ShoppingCartItemAddRequest;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ItemResponse;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ShoppingCartResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.UserResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity.ShoppingCart;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity.ShoppingCartItem;
@@ -170,7 +171,7 @@ public class ShoppingCartServiceImplTest {
     }
 
     @Test
-    void remove_validData_shouldRemoveItemFromShoppingCartSuccessfully(){
+    void remove_validData_shouldRemoveItemFromShoppingCartSuccessfully() {
         UUID userId = UUID.randomUUID();
         Long itemId = 1L;
         Integer itemQuantity = 10;
@@ -205,5 +206,60 @@ public class ShoppingCartServiceImplTest {
         verify(shoppingCartRepository, times(1)).save(shoppingCart);
     }
 
+    @Test
+    void findById_validData_shouldReturnShoppingCartSuccessfully() {
+        UUID userId = UUID.randomUUID();
+        Long itemId = 1L;
+        Integer itemQuantity = 10;
+        String token = "token";
+        String authorization = "Bearer " + token;
+        String username = "username";
 
+        UserResponse userResponse = new UserResponse(userId, username, UserRole.ADMIN);
+        when(credentialsClient.findById(userId)).thenReturn(ResponseEntity.ok(userResponse));
+
+        when(tokenService.recoverToken(authorization)).thenReturn(token);
+        when(decodedJWT.getSubject()).thenReturn(username);
+        when(tokenService.validateToken(token)).thenReturn(decodedJWT);
+
+        Long shoppingCartId = 123L;
+        ShoppingCart shoppingCart = new ShoppingCart(shoppingCartId, userId);
+        ShoppingCartItem shoppingCartItem = new ShoppingCartItem(1L, itemId, 10, shoppingCart);
+        shoppingCart.addItem(shoppingCartItem);
+        when(shoppingCartRepository.findById(itemId)).thenReturn(Optional.of(shoppingCart));
+
+        ItemResponse itemResponse = new ItemResponse("name", "description", new BigDecimal("10.00"), itemQuantity * 3);
+        when(itemsClient.findById(itemId)).thenReturn(ResponseEntity.ok(itemResponse));
+
+        ShoppingCartResponse result = shoppingCartService.findById(authorization, itemId);
+
+        assertNotNull(result);
+        assertEquals(shoppingCartId, result.id());
+        assertEquals(userId, result.userId());
+
+        BigDecimal expectedTotal = itemResponse.price().multiply(new BigDecimal(shoppingCartItem.getQuantity()));
+        assertEquals(expectedTotal, result.total());
+
+        assertEquals(ShoppingCartStatus.ACTIVE, result.status());
+
+        verify(shoppingCartRepository, times(1)).findById(itemId);
+        verify(itemsClient, times(1)).findById(itemId);
+    }
+
+    @Test
+    void findById_shoppingCartNonexistent_shouldThrowNotFoundException() {
+        Long shoppingCartId = 123L;
+
+        when(shoppingCartRepository.findById(shoppingCartId)).thenReturn(Optional.empty());
+
+        NotFoundException notFoundException = assertThrows(
+                NotFoundException.class,
+                () -> shoppingCartService.findById("token", shoppingCartId)
+        );
+
+        assertEquals(
+                "Carrinho de compras com id '" + shoppingCartId + "' não foi encontrado",
+                notFoundException.getMessage()
+        );
+    }
 }
