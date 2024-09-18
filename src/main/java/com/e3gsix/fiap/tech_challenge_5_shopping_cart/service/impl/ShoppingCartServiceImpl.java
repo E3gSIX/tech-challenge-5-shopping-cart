@@ -157,7 +157,7 @@ class ShoppingCartServiceImpl implements ShoppingCartService {
     }
 
     private ShoppingCartItemResponse toShoppingCartItemResponse(ShoppingCartItem inCartItem) {
-        ItemResponse itemResponse = getValidatedItem(inCartItem.getId());
+        ItemResponse itemResponse = getValidatedItem(inCartItem.getItemId());
         return new ShoppingCartItemResponse(
                 itemResponse.name(),
                 itemResponse.price(),
