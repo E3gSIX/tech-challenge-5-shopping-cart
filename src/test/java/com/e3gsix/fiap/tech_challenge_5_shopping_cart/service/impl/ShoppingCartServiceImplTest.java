@@ -7,6 +7,7 @@ import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.NotAu
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.controller.exception.NotFoundException;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.request.ShoppingCartItemAddRequest;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ItemResponse;
+import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.PaymentIntegrityResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.ShoppingCartResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.dto.response.UserResponse;
 import com.e3gsix.fiap.tech_challenge_5_shopping_cart.model.entity.ShoppingCart;
@@ -261,5 +262,43 @@ public class ShoppingCartServiceImplTest {
                 "Carrinho de compras com id '" + shoppingCartId + "' não foi encontrado",
                 notFoundException.getMessage()
         );
+    }
+
+    @Test
+    void checkPaymentIntegrity_validActiveShoppingCart_shouldReturnTrueIntegrity() {
+        UUID userId = UUID.randomUUID();
+        Long itemId = 1L;
+        String token = "token";
+        String authorization = "Bearer " + token;
+
+        Long shoppingCartId = 123L;
+        ShoppingCart shoppingCart = new ShoppingCart(shoppingCartId, userId);
+        ShoppingCartItem shoppingCartItem = new ShoppingCartItem(1L, itemId, 10, shoppingCart);
+        shoppingCart.addItem(shoppingCartItem);
+        when(shoppingCartRepository.findById(itemId)).thenReturn(Optional.of(shoppingCart));
+
+        PaymentIntegrityResponse result = shoppingCartService.checkPaymentIntegrity(authorization, itemId);
+
+        assertNotNull(result);
+        assertTrue(result.integrity());
+        assertEquals("Ready to conclude.", result.reason());
+    }
+
+    @Test
+    void checkPaymentIntegrity_emptyActiveShoppingCart_shouldThrowUnsupportedOperationException() {
+        UUID userId = UUID.randomUUID();
+        Long itemId = 1L;
+        String token = "token";
+        String authorization = "Bearer " + token;
+
+        Long shoppingCartId = 123L;
+        ShoppingCart shoppingCart = new ShoppingCart(shoppingCartId, userId);
+        when(shoppingCartRepository.findById(itemId)).thenReturn(Optional.of(shoppingCart));
+
+        PaymentIntegrityResponse result = shoppingCartService.checkPaymentIntegrity(authorization, itemId);
+
+        assertNotNull(result);
+        assertFalse(result.integrity());
+        assertEquals("O carrinho precisa ter ao menos um item para ser concluído.", result.reason());
     }
 }
