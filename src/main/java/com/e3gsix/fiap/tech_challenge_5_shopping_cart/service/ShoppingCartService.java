@@ -11,7 +11,7 @@ public interface ShoppingCartService {
 
     Long remove(String authorization, UUID userId, Long itemId);
 
-    ShoppingCartResponse findById(String authorization, Long id);
+    ShoppingCartResponse findById(Long id);
 
     void conclude(String authorization, UUID userId, Long id);
 

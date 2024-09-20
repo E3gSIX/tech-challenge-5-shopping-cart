@@ -23,10 +23,7 @@ public interface ShoppingCartController {
             UriComponentsBuilder uriComponentsBuilder
     );
 
-    ResponseEntity<ShoppingCartResponse> findById(
-            String authorization,
-            Long id
-    );
+    ResponseEntity<ShoppingCartResponse> findById(Long id);
 
     ResponseEntity<PaymentIntegrityResponse> checkIntegrityForPayment(
             String authorization,
