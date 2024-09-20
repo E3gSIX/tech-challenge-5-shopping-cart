@@ -301,4 +301,125 @@ public class ShoppingCartServiceImplTest {
         assertFalse(result.integrity());
         assertEquals("O carrinho precisa ter ao menos um item para ser concluído.", result.reason());
     }
+
+    @Test
+    void conclude_userIdNonexistent_shouldThrowNotFoundException() {
+        UUID userId = UUID.randomUUID();
+        Long shoppingCartId = 123L;
+        String token = "token";
+        String authorization = "Bearer " + token;
+
+        when(credentialsClient.findById(userId)).thenReturn(null);
+
+        NotFoundException notFoundException = assertThrows(
+                NotFoundException.class,
+                () -> shoppingCartService.conclude(authorization, userId, shoppingCartId)
+        );
+
+        assertEquals("Usuário com id '" + userId + "' não foi encontrado", notFoundException.getMessage());
+    }
+
+    @Test
+    void conclude_usernameDifferentThanReceivedFromCredentialsClient_shouldThrowNotAuthorizedException() {
+        UUID userId = UUID.randomUUID();
+        Long shoppingCartId = 123L;
+        String username = "username";
+        String token = "token";
+        String authorization = "Bearer " + token;
+
+        UserResponse userResponse = new UserResponse(userId, username, UserRole.ADMIN);
+        when(credentialsClient.findById(userId)).thenReturn(ResponseEntity.ok(userResponse));
+
+        when(tokenService.recoverToken(authorization)).thenReturn(token);
+        when(decodedJWT.getSubject()).thenReturn("DifferentThanUsername");
+        when(tokenService.validateToken(token)).thenReturn(decodedJWT);
+
+        NotAuthorizedException notAuthorizedException = assertThrows(
+                NotAuthorizedException.class,
+                () -> shoppingCartService.conclude(authorization, userId, shoppingCartId)
+        );
+
+        assertEquals("Este usuário não têm permissão para realizar essa ação.", notAuthorizedException.getMessage());
+    }
+
+    @Test
+    void conclude_shoppingCartNonexistent_shouldThrowNotFoundException() {
+        UUID userId = UUID.randomUUID();
+        Long shoppingCartId = 123L;
+        String username = "username";
+        String token = "token";
+        String authorization = "Bearer " + token;
+
+        UserResponse userResponse = new UserResponse(userId, username, UserRole.ADMIN);
+        when(credentialsClient.findById(userId)).thenReturn(ResponseEntity.ok(userResponse));
+
+        when(tokenService.recoverToken(authorization)).thenReturn(token);
+        when(decodedJWT.getSubject()).thenReturn(username);
+        when(tokenService.validateToken(token)).thenReturn(decodedJWT);
+
+        when(shoppingCartRepository.findById(shoppingCartId)).thenReturn(Optional.empty());
+
+        NotFoundException notFoundException = assertThrows(
+                NotFoundException.class,
+                () -> shoppingCartService.conclude(authorization, userId, shoppingCartId)
+        );
+
+        assertEquals(
+                "Carrinho de compras com id '" + shoppingCartId + "' não foi encontrado",
+                notFoundException.getMessage()
+        );
+    }
+
+    @Test
+    void conclude_shoppingCartFinalState_shouldThrowUnsupportedOperationException() {
+        UUID userId = UUID.randomUUID();
+        Long shoppingCartId = 123L;
+        String username = "username";
+        String token = "token";
+        String authorization = "Bearer " + token;
+
+        UserResponse userResponse = new UserResponse(userId, username, UserRole.ADMIN);
+        when(credentialsClient.findById(userId)).thenReturn(ResponseEntity.ok(userResponse));
+
+        when(tokenService.recoverToken(authorization)).thenReturn(token);
+        when(decodedJWT.getSubject()).thenReturn(username);
+        when(tokenService.validateToken(token)).thenReturn(decodedJWT);
+
+        ShoppingCart shoppingCart = new ShoppingCart(shoppingCartId, userId);
+        shoppingCart.setStatus(ShoppingCartStatus.CONCLUDED); // final state
+        when(shoppingCartRepository.findById(shoppingCartId)).thenReturn(Optional.of(shoppingCart));
+
+        UnsupportedOperationException unsupportedOperationException = assertThrows(
+                UnsupportedOperationException.class,
+                () -> shoppingCartService.conclude(authorization, userId, shoppingCartId)
+        );
+
+        assertEquals(
+                "O carrinho já se encontra em estado final.",
+                unsupportedOperationException.getMessage()
+        );
+    }
+
+    @Test
+    void conclude_validData_shouldConcludeShoppingCartSuccessfully() {
+        UUID userId = UUID.randomUUID();
+        Long shoppingCartId = 123L;
+        String username = "username";
+        String token = "token";
+        String authorization = "Bearer " + token;
+
+        UserResponse userResponse = new UserResponse(userId, username, UserRole.ADMIN);
+        when(credentialsClient.findById(userId)).thenReturn(ResponseEntity.ok(userResponse));
+
+        when(tokenService.recoverToken(authorization)).thenReturn(token);
+        when(decodedJWT.getSubject()).thenReturn(username);
+        when(tokenService.validateToken(token)).thenReturn(decodedJWT);
+
+        ShoppingCart shoppingCart = new ShoppingCart(shoppingCartId, userId);
+        when(shoppingCartRepository.findById(shoppingCartId)).thenReturn(Optional.of(shoppingCart));
+
+        shoppingCartService.conclude(authorization, userId, shoppingCartId);
+        verify(shoppingCartRepository, times(1)).save(shoppingCart);
+        assertEquals(ShoppingCartStatus.CONCLUDED, shoppingCart.getStatus());
+    }
 }
